@@ -11,29 +11,28 @@ namespace TrackMeApp.Statistics
         public double Worked;
         public int NumberOfBreaks;
         public double TotalBreakTime;
-        public List<ProcessedProcessData> Processes;
+        public List<ProcessedTaskData> Tasks;
 
         public MonthData()
         {
             Worked = TotalBreakTime = 0;
             NumberOfBreaks = 0;
-            Processes = new List<ProcessedProcessData>();
+            Tasks = new List<ProcessedTaskData>();
         }
 
         public void AddSession(SessionData session)
         {
             Worked += session.ElapsedTime;
-            foreach (ProcessData item in session.Processes)
+            var index = Tasks.FindIndex(p => p.Title == session.TaskData.Title);
+            if (index > -1)
             {
-                var index = Processes.FindIndex(p => p.ProcessName == item.ProcessName);
-                if (index > -1)
-                {
-                    Processes[index].Merge(item);
-                }
-                else
-                {
-                    Processes.Add(new ProcessedProcessData(item));
-                }
+                Tasks[index].AddSession(session);
+            }
+            else
+            {
+                var task = new ProcessedTaskData(session.TaskData.Title);
+                task.AddSession(session);
+                Tasks.Add(task);
             }
             foreach (BreakData item in session.Breaks)
             {

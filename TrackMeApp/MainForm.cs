@@ -45,7 +45,10 @@ namespace TrackMeApp
         {
             if (sessionData == null)
             {
-                sessionData = new SessionData(poolStatusTimer);
+                string taskTitle = "Unknown";
+                if (Globals.UserId > -1 && tasksComboBox.SelectedIndex >= 0)
+                    taskTitle = tasksComboBox.Text;
+                sessionData = new SessionData(poolStatusTimer, taskTitle, String.Empty);
                 sessionData.StateChanged += SessionData_StateChanged;
             }
 
@@ -81,7 +84,14 @@ namespace TrackMeApp
             {
                 sessionData.Stop();
                 sessions.Add(sessionData);
-
+                if (Globals.UserId > -1)
+                {
+                    _ = Extensions.HttpPostAsync(Properties.Settings.Default.logSessionRequestUri, new Dictionary<string, string>()
+                    {
+                        { "userId", Globals.UserId.ToString() },
+                        { "session", JsonConvert.SerializeObject(sessionData) }
+                    });
+                }
                 if (statisticsForm != null)
                     statisticsForm.RefreshData(sessions);
             }
@@ -89,6 +99,8 @@ namespace TrackMeApp
 
         private void statistics_Click(object sender, EventArgs e)
         {
+            if (statisticsForm.IsDisposed)
+                statisticsForm = new StatisticsForm(sessions);
             statisticsForm.Show();
         }
 
@@ -109,6 +121,54 @@ namespace TrackMeApp
         private void MainForm_FormClosing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
             File.WriteAllText(Properties.Settings.Default.filename, JsonConvert.SerializeObject(sessions));
+        }
+
+        private async void LoginBtn_Click(object sender, EventArgs e)
+        {
+            using (var form = new LoginForm())
+            {
+                var result = form.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    loginBtn.Hide();
+                    tasksComboBox.Show();
+                    Globals.UserId = form.UserId;
+                    var responseJson = await Extensions.HttpPostAsync(Properties.Settings.Default.getTasksRequestUri, new Dictionary<string, string>()
+                    {
+                        { "userId", Globals.UserId.ToString() }
+                    });
+                    if (!String.IsNullOrWhiteSpace(responseJson))
+                    {
+                        var tasks = JsonConvert.DeserializeObject<List<HttpResponses.TaskResponse>>(responseJson);
+                        foreach (var task in tasks)
+                        {
+                            tasksComboBox.Items.Add(task.title);
+                        }
+                        if (tasksComboBox.Items.Count > 0)
+                            tasksComboBox.SelectedIndex = 0;
+                    }
+
+                    responseJson = await Extensions.HttpPostAsync(Properties.Settings.Default.getSessionsRequestUri, new Dictionary<string, string>()
+                    {
+                        { "userId", Globals.UserId.ToString() }
+                    });
+                    if (!String.IsNullOrWhiteSpace(responseJson))
+                    {
+                        sessions = JsonConvert.DeserializeObject<List<SessionData>>(responseJson);
+                        statisticsForm?.RefreshData(sessions);
+                    }
+                }
+            }
+        }
+
+        private void TopMostBtn_Click(object sender, EventArgs e)
+        {
+            TopMost = !TopMost;
+        }
+
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+
         }
     }
 }

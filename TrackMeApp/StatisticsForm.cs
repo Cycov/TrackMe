@@ -24,15 +24,21 @@ namespace TrackMeApp
         }
 
         private SolidBrush arrowBrush;
+        private Dictionary<string, string> ProcessNameRelationship = new Dictionary<string, string>()
+        {
+            {"POWERPNT.EXE", "PowerPoint" },
+            {"DEVENV.EXE", "Visual studio" }
+        };
 
         private MonthData[] sortedData;
         private MonthData selectedMonth;
+        private ProcessedTaskData selectedTask;
 
         public StatisticsForm(List<SessionData> sessions)
         {
             InitializeComponent();
 
-            arrowBrush = new SolidBrush(Color.DarkBlue);
+            arrowBrush = new SolidBrush(Color.LightBlue);
             SortData(sessions);
         }
 
@@ -49,22 +55,52 @@ namespace TrackMeApp
             sortedData = new MonthData[12];
             foreach (SessionData session in sessions)
             {
-                int month = session.SessionStart.Month;
+                int month = session.SessionStart.Month - 1;
                 if (sortedData[month] == null)
                     sortedData[month] = new MonthData();
                 sortedData[month].AddSession(session);
             }
-            for (int i = 1; i < 13; i++)
+        }
+
+        private void PopulateTaskChart()
+        {
+            selectedMonth = sortedData[dummyTabControl.SelectedIndex];
+            processesListBox.Items.Clear();
+            appsChart.Series.Clear();
+            windowsListBox.Items.Clear();
+            windowsChart.Series.Clear();
+            if (selectedMonth == null)
             {
-                comboBox1.Items.Add(new DateTime(2010, i, 1).ToString("MMMM", System.Globalization.CultureInfo.InvariantCulture));
+                dataPanel.Hide();
+                return;
             }
+            else
+            {
+                dataPanel.Show();
+            }
+
+            tasksChart.Series.Clear();
+            tasksListBox.Items.Clear();
+            Series series = new Series();
+
+            foreach (var task in selectedMonth.Tasks)
+            {
+                var color = Extensions.PalleteColors[windowsChart.Palette][tasksListBox.Items.Count % Extensions.PalleteColors[windowsChart.Palette].Count];
+                tasksListBox.Items.Add(new LegendListBoxItem(color, task.Title));
+                series.Points.AddXY(task.Title, task.ActiveTime);
+            }
+
+
+            series.ChartType = SeriesChartType.Doughnut;
+            series.Label = "#PERCENT{0 %}";
+            series.LegendText = "#VALX";
+
+            tasksChart.Series.Add(series);
         }
 
         private void PopulateAppChart()
         {
-            selectedMonth = sortedData[comboBox1.SelectedIndex];
-            if (selectedMonth == null)
-                return;
+            selectedTask = selectedMonth.Tasks[tasksListBox.SelectedIndex];
             workedTimeLabel.Text = TimeSpan.FromSeconds(selectedMonth.Worked).ToString(@"hh\:mm\:ss");
             breaksLabel.Text = selectedMonth.NumberOfBreaks + " / " + TimeSpan.FromSeconds(selectedMonth.TotalBreakTime).ToString(@"hh\:mm\:ss");
 
@@ -72,10 +108,15 @@ namespace TrackMeApp
             processesListBox.Items.Clear();
             Series series = new Series();
 
-            foreach (var process in selectedMonth.Processes)
+            foreach (var process in selectedTask.Processes)
             {
                 var color = Extensions.PalleteColors[appsChart.Palette][processesListBox.Items.Count % Extensions.PalleteColors[appsChart.Palette].Count];
-                processesListBox.Items.Add(new LegendListBoxItem(color, Path.GetFileNameWithoutExtension(process.ProcessName)));
+                string name;
+                if (ProcessNameRelationship.ContainsKey(process.ProcessName.ToUpper()))
+                    name = ProcessNameRelationship[process.ProcessName.ToUpper()];
+                else
+                    name = Path.GetFileNameWithoutExtension(process.ProcessName);
+                processesListBox.Items.Add(new LegendListBoxItem(color, name));
                 series.Points.AddXY(process.ProcessName, process.FocusedSeconds);
             }
 
@@ -83,6 +124,8 @@ namespace TrackMeApp
             series.Label = "#PERCENT{0 %}";
             series.LegendText = "#VALX";
 
+            appsChart.Titles[0].Text = selectedTask.Title;
+            appsChart.Titles[1].Text = TimeSpan.FromSeconds(selectedTask.ActiveTime).ToString(@"hh\:mm\:ss");
             appsChart.Series.Add(series);
         }
 
@@ -93,7 +136,7 @@ namespace TrackMeApp
 
         private void PopulateWindowsChart()
         {
-            var selectedProcess = selectedMonth.Processes[processesListBox.SelectedIndex];
+            var selectedProcess = selectedTask.Processes[processesListBox.SelectedIndex];
 
             windowsChart.Series.Clear();
             windowsListBox.Items.Clear();
@@ -113,11 +156,6 @@ namespace TrackMeApp
             windowsChart.Titles[0].Text = selectedProcess.ProcessName;
             windowsChart.Titles[1].Text = TimeSpan.FromSeconds(selectedProcess.FocusedSeconds).ToString(@"hh\:mm\:ss");
             windowsChart.Series.Add(series);
-        }
-
-        private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            PopulateAppChart();
         }
 
         private void ProcessesListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -141,10 +179,29 @@ namespace TrackMeApp
                                           e.ForeColor,
                                           Color.LightBlue);//Choose the color
 
-            g.FillRectangle(new SolidBrush(lbi.Color), e.Bounds.X, e.Bounds.Y, 20, e.Bounds.Height);
+            g.FillRectangle(new SolidBrush(lbi.Color), e.Bounds.X + 3, e.Bounds.Y, 20, e.Bounds.Height - 3);
             g.DrawString(lbi.Name, e.Font, new SolidBrush(Color.Black), new PointF(e.Bounds.X + 20, e.Bounds.Y));
-
             e.DrawFocusRectangle();
+        }
+
+        private void DummyTabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            PopulateTaskChart();
+        }
+
+        private void StatisticsForm_Shown(object sender, EventArgs e)
+        {
+            dummyTabControl.SelectedIndex = DateTime.Now.Month - 1;
+        }
+
+        private void TasksListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            PopulateAppChart();
+        }
+
+        private void StatisticsForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -1,0 +1,11 @@
+<form>
+  <div>
+    <input name="form-email" type="text" placeholder="Email" [(ngModel)]="credentials.email"/>
+  </div>
+  <div>
+    <input name="form-password" type="password" placeholder="Password" [(ngModel)]="credentials.password"/>
+  </div>
+  <div>
+    <button (click)="login()" value="Log in">Log in</button>
+  </div>
+</form>

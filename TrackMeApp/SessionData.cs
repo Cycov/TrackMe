@@ -3,13 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Automation;
-using System.Windows.Forms;
 
 namespace TrackMeApp
 {
@@ -75,10 +72,14 @@ namespace TrackMeApp
             SessionState = SessionStates.Idle;
             Breaks = new List<BreakData>();
             Processes = new List<ProcessData>();
-            TaskData = new TaskData("pew", "pow");
         }
 
-        public SessionData(System.Windows.Forms.Timer timer) : this()
+        public SessionData(string taskTitle, string taskDesc) : this()
+        {
+            TaskData = new TaskData(taskTitle, taskDesc);
+        }
+
+        public SessionData(System.Windows.Forms.Timer timer, string taskTitle, string taskDesc) : this(taskTitle, taskDesc)
         {
             timer.Tick += Timer_Tick;
         }

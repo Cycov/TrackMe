@@ -31,5 +31,50 @@ namespace TrackMeApp.Properties {
                 return ((string)(this["filename"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8000")]
+        public string apiUrl {
+            get {
+                return ((string)(this["apiUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/login")]
+        public string loginRequestUri {
+            get {
+                return ((string)(this["loginRequestUri"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/getUserTasks")]
+        public string getTasksRequestUri {
+            get {
+                return ((string)(this["getTasksRequestUri"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/getSessions")]
+        public string getSessionsRequestUri {
+            get {
+                return ((string)(this["getSessionsRequestUri"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/logSession")]
+        public string logSessionRequestUri {
+            get {
+                return ((string)(this["logSessionRequestUri"]));
+            }
+        }
     }
 }

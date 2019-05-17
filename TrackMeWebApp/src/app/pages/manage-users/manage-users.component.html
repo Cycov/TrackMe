@@ -1,0 +1,20 @@
+<form>
+  <div>
+    <input name="form-email" type="text" placeholder="Email" [(ngModel)]="credentials.email"/>
+  </div>
+  <div>
+    <input name="form-password" type="text" placeholder="Password" [(ngModel)]="credentials.password"/>
+  </div>
+  <div>
+    <button (click)="addNewUser()" value="Add new user">Create new user</button>
+  </div>
+</form>
+
+<form>
+  <div *ngFor="let user of users" class="bordered">
+    <span>user.name</span>
+    <input #newTaskName type="text"/>
+    <button (click)="addNewTask(user.id)">Add new task</button>
+    <button (click)="downloadData(user.id)">Download data</button>
+  </div>
+</form>

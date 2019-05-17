@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -35,6 +36,15 @@ namespace TrackMeApp
             if (value[0] != '#')
                 value = value.Insert(0, "#");
             return ColorTranslator.FromHtml(value);
+        }
+
+        public static async Task<string> HttpPostAsync(string uri, Dictionary<string, string> values)
+        {
+            var content = new FormUrlEncodedContent(values);
+            var url = Properties.Settings.Default.apiUrl + uri;
+            Debug.WriteLine(url);
+            var response = await Globals.Client.PostAsync(url, content);
+            return await response.Content.ReadAsStringAsync();
         }
     }
 }

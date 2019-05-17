@@ -5,5 +5,20 @@
     <Setting Name="filename" Type="System.String" Scope="Application">
       <Value Profile="(Default)">sessions.json</Value>
     </Setting>
+    <Setting Name="apiUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://localhost:8000</Value>
+    </Setting>
+    <Setting Name="loginRequestUri" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/login</Value>
+    </Setting>
+    <Setting Name="getTasksRequestUri" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/getUserTasks</Value>
+    </Setting>
+    <Setting Name="getSessionsRequestUri" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/getSessions</Value>
+    </Setting>
+    <Setting Name="logSessionRequestUri" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/logSession</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

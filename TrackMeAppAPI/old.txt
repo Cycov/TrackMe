@@ -1,0 +1,54 @@
+import express = require('express');
+import sqlite = require('sqlite3');
+import bodyParser = require('body-parser');
+//http codes: 501 - not implemented
+//            400 - bad syntax
+
+const app: express.Application = express();
+const port: number = 3000;
+var db: sqlite.Database = new sqlite.Database("sensyspeechdb.db", function(err){
+    if (err)
+        console.error(err);    
+    console.log("Connected to database");
+});
+var eRouter : express.Router;
+
+app.post('/addCommand', bodyParser.json(), function(req, res) {
+    console.log(req.body);
+    res.sendStatus(201);
+});
+
+app.post('/recognisedPhrase', function(req, res) {
+    //console.log(req.body.phrase);
+    res.sendStatus(501); //not implemented
+});
+
+app.post('*',function (req, res) {
+    res.sendStatus(400); //bad syntax
+});
+
+app.get('*', function(req, res){
+    res.sendStatus(400); //bad syntax
+});
+
+app.patch('/recognisedPhrase', function(req, res) {
+    res.sendStatus(501); //not implemented
+});
+
+app.patch('*',function (req, res) {
+    res.sendStatus(400); //bad syntax
+});
+
+//192.168.59.147:3000/addCommand/:phrase/:description --POST
+//192.168.59.147:3000/recognisedPhrase/:phrase --POST
+//192.168.59.147:3000/recognisedPhrase/:phrase --PATCH
+
+app.listen(port, function(){
+    console.log("Server started on port" + port);
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+})
+
+//app.get('/pew/:pow', function (res, req) {
+//    var name = req.params.pow;
+//})
